@@ -1,0 +1,25 @@
+
+def PowerShell(psCmd) {
+        psCmd=psCmd.replaceAll("%", "%%")
+        bat "powershell.exe $psCmd;"
+    }
+pipeline {
+    
+    agent { label 'master' }
+    stages {
+        stage('build') {
+            steps {
+                dir('C:/CIAM_2/frontend') {
+                    PowerShell( "npm run build ${Market}")
+                }
+            }
+        }
+        stage('Deploy to CDN and Auth0') {
+            steps {
+                dir('C:/CIAM_2/frontend') {
+                    PowerShell("npm run ci:deploy ${Market}")
+                }
+            }
+        }
+    }
+}
