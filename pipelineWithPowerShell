@@ -1,4 +1,5 @@
 
+def EnvironmentsArr = Environments.split(',')
 def PowerShell(psCmd) {
         psCmd=psCmd.replaceAll("%", "%%")
         bat "powershell.exe $psCmd;"
@@ -12,7 +13,7 @@ pipeline {
 				script {
 					if(!SkipBuild){
 						dir('C:/CIAM_2/frontend') {
-							 PowerShell( "npm run build ${Market}")
+							 PowerShell( "npm run build ${EnvironmentsArr[0]}")
 						}
 					}
 				}
@@ -21,9 +22,22 @@ pipeline {
         }
         stage('Deploy to CDN and Auth0') {
             steps {
-                dir('C:/CIAM_2/frontend') {
-                    PowerShell("npm run ci:deploy ${Market}")
-                }
+				script {
+					dir('C:/CIAM_2/frontend') {		
+						def folderName = "C:/CIAM_2/frontend/build-production-"+	EnvironmentsArr[0]			
+						EnvironmentsArr.eachWithIndex { env, index ->														
+							if(index != 0){
+								def newFolderName = "C:/CIAM_2/frontend/build-production-"+	env
+								PowerShell ( "Rename-Item  ${folderName} ${newFolderName}")
+							}
+							def printText = "Write-Host \"${env}\" -ForegroundColor Green -NoNewline;"
+							PowerShell (printText)
+							PowerShell("npm run ci:deploy ${env}")
+						}
+						
+					}
+				}
+                
             }
         }
     }
