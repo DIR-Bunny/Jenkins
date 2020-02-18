@@ -12,7 +12,7 @@ pipeline {
             steps {
 				script {
 					if(!SkipBuild){
-						dir('C:/CIAM_2/frontend') {
+						dir('C:/temp/frontend') {
 							 PowerShell( "npm run build ${EnvironmentsArr[0]}")
 						}
 					}
@@ -24,15 +24,15 @@ pipeline {
             steps {
 				script {
 					dir('C:/CIAM_2/frontend') {		
-						def folderName = "C:/CIAM_2/frontend/build-production-"+	EnvironmentsArr[0]			
+						def folderName = "C:/temp/frontend/build-production-"+	EnvironmentsArr[0]			
 						EnvironmentsArr.eachWithIndex { env, index ->														
 							if(index != 0){
-								def newFolderName = "C:/CIAM_2/frontend/build-production-"+	env
+								def newFolderName = "C:/temp/frontend/build-production-"+	env
 								PowerShell ( "Rename-Item  ${folderName} ${newFolderName}")
 							}
 							def printText = "Write-Host \"${env}\" -ForegroundColor Green -NoNewline;"
 							PowerShell (printText)
-							PowerShell("npm run ci:deploy ${env}")
+							PowerShell("npm run deploy ${env}")
 						}
 						
 					}
